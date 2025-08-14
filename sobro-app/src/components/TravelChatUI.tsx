@@ -24,37 +24,17 @@ import FollowUpQuestions from "./travel/FollowUpQuestions";
 import SearchResultsList from "./travel/SearchCard";
 import ToolDataCard from "./travel/ToolDataCard";
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  createAppKit,
-  useAppKitAccount,
-  useWalletInfo,
-  useDisconnect,
-} from "@reown/appkit/react";
-import { solana, solanaTestnet, solanaDevnet } from "@reown/appkit/networks";
-import { metadata, projectId, solanaWeb3JsAdapter } from "../context/index";
+// Removed Reown imports - using Camp Network instead
 import Sidebar from "./grants/sidebar";
 import Orb from "./ui/Orb";
 import { Textarea } from "./ui/textarea";
 
 // Create modal (this part remains unchanged as it's configuration)
-createAppKit({
-  projectId,
-  metadata,
-  themeMode: "dark",
-  networks: [solana, solanaTestnet, solanaDevnet],
-  adapters: [solanaWeb3JsAdapter],
-  features: {
-    analytics: true,
-  },
-  themeVariables: {
-    "--w3m-accent": "#3b82f6",
-  },
-});
+let embeddedWalletInfo = {
+  user:{
+    email:"sobro@gmail.com"
+  }
+}
 
 interface Message {
   id: string;
@@ -82,10 +62,7 @@ const TravelChatUI = () => {
   const [isFirstQueryResponse, setIsFirstQueryResponse] = useState(true);
   const wsRef = useRef<WebSocket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { address, isConnected, status, embeddedWalletInfo } =
-    useAppKitAccount();
-  const walletInfo = useWalletInfo();
-  const { disconnect } = useDisconnect();
+
 
   const { toast } = useToast();
 
@@ -96,14 +73,6 @@ const TravelChatUI = () => {
       setInputValue(`${decodeURIComponent(queryParam)}`);
     }
   }, [searchParams, isConnect]);
-
-  const handleDisconnect = async () => {
-    try {
-      await disconnect();
-    } catch (error) {
-      console.error("Failed to disconnect:", error);
-    }
-  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -594,142 +563,7 @@ const TravelChatUI = () => {
                     {isConnect ? "Connected" : "Disconnected"}
                   </Badge>
                 </div>
-                {/* Wallet Dropdown */}
-                {isConnected && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger className="focus:outline-none">
-                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center">
-                        {" "}
-                        {/* Adjusted size */}
-                        <User className="w-4 h-4 sm:w-5 sm:h-5 text-white" />{" "}
-                        {/* Adjusted icon size */}
-                      </div>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      align="end"
-                      className="w-72 sm:w-80 p-0 bg-white dark:bg-[#0F0F12] border border-gray-200 dark:border-gray-700 shadow-xl rounded-xl overflow-hidden" /* Adjusted width */
-                    >
-                      <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2">
-                        <div className="flex items-center gap-3">
-                          <img
-                            src={
-                              embeddedWalletInfo?.user?.email
-                                ? `https://api.dicebear.com/7.x/initials/svg?seed=${embeddedWalletInfo.user.email}`
-                                : address
-                                ? `https://api.dicebear.com/7.x/identicon/svg?seed=${address}`
-                                : "https://api.dicebear.com/7.x/identicon/svg?seed=default"
-                            }
-                            alt="Avatar"
-                            className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/20 p-1" /* Adjusted size */
-                          />
-                          <div className="flex-1">
-                            <div className="text-white font-semibold text-sm truncate">
-                              {embeddedWalletInfo?.user?.email ||
-                                embeddedWalletInfo?.user?.username ||
-                                (address
-                                  ? `${address.slice(0, 6)}...${address.slice(
-                                      -4
-                                    )}`
-                                  : "Wallet User")}
-                            </div>
-                            <div className="text-blue-100 text-xs">
-                              {embeddedWalletInfo?.accountType || "Wallet User"}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="p-2 space-y-2 sm:space-y-3">
-                        {" "}
-                        {/* Adjusted space */}
-                        <div className="flex items-center justify-between text-sm">
-                          {" "}
-                          {/* Adjusted text size */}
-                          <span className="text-gray-600 dark:text-gray-400">
-                            Wallet:
-                          </span>
-                          <span className="font-medium text-gray-900 dark:text-white">
-                            {walletInfo.walletInfo?.name || "Connected Wallet"}
-                          </span>
-                        </div>
-                        {address && (
-                          <div className="flex items-center justify-between text-sm">
-                            {" "}
-                            {/* Adjusted text size */}
-                            <span className="text-gray-600 dark:text-gray-400">
-                              Address:
-                            </span>
-                            <span className="font-mono text-gray-900 dark:text-white text-xs sm:text-sm">
-                              {" "}
-                              {/* Adjusted text size */}
-                              {`${address.slice(0, 8)}...${address.slice(-8)}`}
-                            </span>
-                          </div>
-                        )}
-                        {embeddedWalletInfo?.user?.email && (
-                          <div className="flex items-center justify-between text-sm">
-                            {" "}
-                            {/* Adjusted text size */}
-                            <span className="text-gray-600 dark:text-gray-400">
-                              Email:
-                            </span>
-                            <span className="text-gray-900 dark:text-white truncate ml-2 text-xs sm:text-sm">
-                              {" "}
-                              {/* Adjusted text size */}
-                              {embeddedWalletInfo.user.email}
-                            </span>
-                          </div>
-                        )}
-                        {embeddedWalletInfo?.authProvider && (
-                          <div className="flex items-center justify-between text-sm">
-                            {" "}
-                            {/* Adjusted text size */}
-                            <span className="text-gray-600 dark:text-gray-400">
-                              Provider:
-                            </span>
-                            <span className="text-gray-900 dark:text-white">
-                              {embeddedWalletInfo.authProvider}
-                            </span>
-                          </div>
-                        )}
-                        <div className="flex items-center justify-between text-sm">
-                          {" "}
-                          {/* Adjusted text size */}
-                          <span className="text-gray-600 dark:text-gray-400">
-                            Status:
-                          </span>
-                          <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                            <span className="text-green-600 dark:text-green-400 font-medium">
-                              {status || "Connected"}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
-                          <button
-                            onClick={handleDisconnect}
-                            className="w-full px-3 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-lg transition-colors duration-200 flex items-center justify-center gap-2" /* Adjusted padding */
-                          >
-                            <svg
-                              className="w-4 h-4"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                              />
-                            </svg>
-                            Disconnect Wallet
-                          </button>
-                        </div>
-                      </div>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
+                
               </div>
             </div>
           </div>

@@ -1,12 +1,16 @@
-import { useAuth, useAuthState } from "@campnetwork/origin/react";
+import {  useAuthState } from "@campnetwork/origin/react";
 import CampAuth from "./CampAuth";
 import ImageUploader from "./ImageUploader";
+import Sidebar from "../grants/sidebar";
 
 export default function CampMemories() {
   const { authenticated } = useAuthState();
-  const { origin, jwt } = useAuth();
 
   return (
+    <>
+        <div className="flex min-h-screen bg-background">
+
+    <Sidebar/>
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Header */}
@@ -63,5 +67,7 @@ export default function CampMemories() {
         </div>
       </div>
     </div>
+    </div>
+    </>
   );
 }

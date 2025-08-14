@@ -1,11 +1,10 @@
-import { useAuth, useAuthState, useModal } from "@campnetwork/origin/react";
+import { useAuthState, useModal } from "@campnetwork/origin/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ShieldCheckIcon } from "lucide-react";
 
 export default function CampAuth() {
   const { authenticated } = useAuthState();
-  const { origin, jwt } = useAuth();
   const { openModal } = useModal();
 
   const handleConnectWallet = async () => {

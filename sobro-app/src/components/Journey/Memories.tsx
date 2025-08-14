@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CalendarDays, Image as ImageIcon, ExternalLink, Upload } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useAuth, useAuthState } from "@campnetwork/origin/react";
+import { useAuthState } from "@campnetwork/origin/react";
+import Sidebar from "../grants/sidebar";
 
 interface UploadedMemory {
   id: string;
@@ -24,7 +25,6 @@ export default function Memories() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { authenticated } = useAuthState();
-  const { origin, jwt } = useAuth();
 
   useEffect(() => {
     loadMemories();
@@ -77,7 +77,12 @@ export default function Memories() {
   }
 
   return (
+    <>
+<div className="flex min-h-screen bg-background">
+    <Sidebar />
+
     <div className="min-h-screen bg-background p-6">
+            
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -203,5 +208,7 @@ export default function Memories() {
         )}
       </div>
     </div>
+    </div>
+    </>
   );
 }

@@ -3,59 +3,28 @@
 import type React from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Send, Zap, User2, Settings } from "lucide-react";
+import { Send, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Sidebar from "@/components/grants/sidebar";
-import { Link } from "react-router-dom";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import MagicBento, { BentoCardProps } from "@/components/ui/MagicBento";
 import InteractiveBackgroundLayout from "@/components/layouts/InteractiveComponent";
-import {
-  createAppKit,
-  useAppKitAccount,
-  useWalletInfo,
-  useDisconnect,
-} from "@reown/appkit/react";
-import { solana, solanaTestnet, solanaDevnet } from "@reown/appkit/networks";
-import { metadata, projectId, solanaWeb3JsAdapter } from "../context/index";
-import { useUserProfile } from "../hooks/useUserProfile";
+import {  useAuthState, useModal } from "@campnetwork/origin/react";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 
-// Create modal
-createAppKit({
-  projectId,
-  metadata,
-  themeMode: "dark",
-  networks: [solana, solanaTestnet, solanaDevnet],
-  adapters: [solanaWeb3JsAdapter],
-  features: {
-    analytics: true,
-  },
-  themeVariables: {
-    "--w3m-accent": "#3b82f6",
-  },
-});
 
 export default function TravelChatHome() {
   const [agentMode, setAgentMode] = useState(false);
   const [inputValue, setInputValue] = useState("");
-  const { address, isConnected, status, embeddedWalletInfo } =
-    useAppKitAccount();
-  const walletInfo = useWalletInfo();
-  const { disconnect } = useDisconnect();
-  const { profile, isRegistered, getDisplayName } = useUserProfile();
+  const { authenticated } = useAuthState();
+  const { openModal } = useModal();
 
-  const handleDisconnect = async () => {
+  const handleConnectWallet = async () => {
     try {
-      await disconnect();
+      await openModal();
     } catch (error) {
-      console.error("Failed to disconnect:", error);
+      console.error("Failed to connect wallet:", error);
     }
   };
 
@@ -195,115 +164,22 @@ export default function TravelChatHome() {
 
         {/* Content Layer - Interactive */}
         <div className="relative z-10 flex flex-col h-screen">
-          {/* Top Bar with Connect Button & Profile Dropdown */}
+          {/* Top Bar with Connect Button */}
           <div className="flex w-full items-center justify-end p-4">
-            <appkit-button />
-            {isConnected && (
-              <DropdownMenu>
-                <DropdownMenuTrigger className="focus:outline-none ml-4">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center">
-                    <User2 className="w-5 h-5 text-white" />
-                  </div>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="end"
-                  className="w-80 p-0 bg-white dark:bg-[#0F0F12] border border-gray-200 dark:border-gray-700 shadow-xl rounded-xl overflow-hidden"
-                >
-                  <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4">
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={
-                          profile?.avatar ||
-                          (embeddedWalletInfo?.user?.email
-                            ? `https://api.dicebear.com/7.x/initials/svg?seed=${embeddedWalletInfo.user.email}`
-                            : address
-                            ? `https://api.dicebear.com/7.x/identicon/svg?seed=${address}`
-                            : "https://api.dicebear.com/7.x/identicon/svg?seed=default")
-                        }
-                        alt="Avatar"
-                        className="w-12 h-12 rounded-full bg-white/20 p-1"
-                      />
-                      <div className="flex-1">
-                        <div className="text-white font-semibold text-sm truncate">
-                          {getDisplayName()}
-                        </div>
-                        <div className="text-blue-100 text-xs">
-                          {isRegistered ? "Registered User" : "New User"}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="p-4 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">
-                        Wallet:
-                      </span>
-                      <span className="text-sm font-medium text-gray-900 dark:text-white">
-                        {walletInfo.walletInfo?.name || "Connected Wallet"}
-                      </span>
-                    </div>
-                    {address && (
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600 dark:text-gray-400">
-                          Address:
-                        </span>
-                        <span className="text-sm font-mono text-gray-900 dark:text-white">
-                          {`${address.slice(0, 8)}...${address.slice(-8)}`}
-                        </span>
-                      </div>
-                    )}
-                    {embeddedWalletInfo?.user?.email && (
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600 dark:text-gray-400">
-                          Email:
-                        </span>
-                        <span className="text-sm text-gray-900 dark:text-white truncate ml-2">
-                          {embeddedWalletInfo.user.email}
-                        </span>
-                      </div>
-                    )}
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">
-                        Status:
-                      </span>
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <span className="text-sm text-green-600 dark:text-green-400 font-medium">
-                          {status || "Connected"}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="pt-3 border-t border-gray-200 dark:border-gray-700 space-y-2">
-                      <Link
-                        to="/Profile"
-                        className="w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
-                      >
-                        <Settings className="w-4 h-4" />
-                        Manage Profile
-                      </Link>
-                      <button
-                        onClick={handleDisconnect}
-                        className="w-full px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
-                      >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                          />
-                        </svg>
-                        Disconnect Wallet
-                      </button>
-                    </div>
-                  </div>
-                </DropdownMenuContent>
-              </DropdownMenu>
+            {!authenticated ? (
+              <Button
+                onClick={handleConnectWallet}
+                className="bg-orange-500 hover:bg-orange-600 text-white font-medium px-6 py-2 rounded-lg"
+              >
+                Connect Wallet
+              </Button>
+            ) : (
+              <div className="flex items-center space-x-2 px-4 py-2 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="text-sm font-medium text-green-700 dark:text-green-300">
+                  Camp Network Connected
+                </span>
+              </div>
             )}
           </div>
 

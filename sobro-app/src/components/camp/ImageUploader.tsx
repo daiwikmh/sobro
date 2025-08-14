@@ -39,8 +39,6 @@ export default function ImageUploader() {
   const {
     mintIPWithOrigin,
     loading,
-    error: hookError,
-    success: hookSuccess,
     clearError,
     clearSuccess 
   } = useCampfireIntegration();
@@ -48,24 +46,20 @@ export default function ImageUploader() {
   const [preview, setPreview] = useState<string>("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [metadata, setMetadata] = useState<IPMetadata>({
+  const metadata: IPMetadata = {
     name: '',
     description: '',
-  });
-  const [license, setLicense] = useState<LicenseTerms>({
+  };
+  const license: LicenseTerms = {
     price: '0',
     duration: '2629800',
     royalty: '0',
     paymentToken: '0x0000000000000000000000000000000000000000',
-  });
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  };
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Use hook states when available
   const finalLoading = loading;
-  const finalError = hookError || error;
-  const finalSuccess = hookSuccess || success;
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -83,17 +77,14 @@ export default function ImageUploader() {
 
   const handleMint = async () => {
     if (!selectedFile || !title.trim()) {
-      setError('Missing required data for minting')
       return
     }
     if (!authenticated || !origin || !jwt) {
-      setError('Please connect and authenticate your wallet.');
       return;
     }
 
     // Clear previous messages
-    setError('')
-    setSuccess('')
+ 
     clearError()
     clearSuccess()
 
@@ -114,7 +105,6 @@ export default function ImageUploader() {
       )
 
       if (tokenId) {
-        setSuccess(`Successfully minted IP NFT with ID: ${tokenId}`)
         
         // Store in localStorage for memories display
         const memories = JSON.parse(localStorage.getItem('sobro-memories') || '[]');
@@ -144,7 +134,6 @@ export default function ImageUploader() {
       }
     } catch (err) {
       console.error('Minting error:', err)
-      setError(err instanceof Error ? err.message : 'Failed to mint IP NFT')
       toast.error('Failed to mint memory. Please try again.');
     }
   };

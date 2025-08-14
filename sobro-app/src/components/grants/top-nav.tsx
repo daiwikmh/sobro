@@ -3,27 +3,8 @@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger,  } from "@/components/ui/dropdown-menu"
 import { Bell, ChevronRight, Search, User2, Settings } from "lucide-react"
 import { Link } from "react-router"
-import { createAppKit, useAppKitAccount, useWalletInfo, useDisconnect } from '@reown/appkit/react'
-import { solana, solanaTestnet, solanaDevnet } from '@reown/appkit/networks'
-import { metadata, projectId, solanaWeb3JsAdapter } from '../../context/index'
+import { useAuth, useAuthState, useModal } from '@campnetwork/origin/react'
 import { useUserProfile } from '../../hooks/useUserProfile'
-// Create modal
-createAppKit({
-  projectId,
-  metadata,
-  themeMode: 'dark',
-  networks: [solana, solanaTestnet, solanaDevnet],
-  adapters: [solanaWeb3JsAdapter],
-  features: {
-    analytics: true,
-      socials: [
-      "google",
-      ]
-  },
-  themeVariables: {
-    '--w3m-accent': '#3b82f6'
-  }
-})
 
 interface BreadcrumbItem {
   label: string
@@ -32,16 +13,16 @@ interface BreadcrumbItem {
 
 export default function TopNav() {
   const breadcrumbs: BreadcrumbItem[] = [{ label: "Dashboard", href: "/" }, { label: "Home" }]
-  const { address, isConnected, status, embeddedWalletInfo } = useAppKitAccount()
-  const walletInfo = useWalletInfo()
-  const { disconnect } = useDisconnect()
+  const { walletAddress: address } = useAuth()
+  const { authenticated: isConnected } = useAuthState()
+  const { openModal } = useModal()
   const { profile, isRegistered, getDisplayName } = useUserProfile()
 
-  const handleDisconnect = async () => {
+  const handleConnectWallet = async () => {
     try {
-      await disconnect()
+      await openModal()
     } catch (error) {
-      console.error("Failed to disconnect:", error)
+      console.error("Failed to connect wallet:", error)
     }
   }
 
@@ -79,7 +60,14 @@ export default function TopNav() {
           <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
         </button>
 
-        <appkit-button />
+        {!isConnected && (
+          <button 
+            onClick={handleConnectWallet}
+            className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-lg transition-colors"
+          >
+            Connect Wallet
+          </button>
+        )}
 
         {isConnected && (
           <DropdownMenu>
@@ -95,7 +83,7 @@ export default function TopNav() {
               <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4">
                 <div className="flex items-center gap-3">
                   <img
-                    src={profile?.avatar || (embeddedWalletInfo?.user?.email ? `https://api.dicebear.com/7.x/initials/svg?seed=${embeddedWalletInfo.user.email}` : (address ? `https://api.dicebear.com/7.x/identicon/svg?seed=${address}` : 'https://api.dicebear.com/7.x/identicon/svg?seed=default'))}
+                    src={profile?.avatar || (address ? `https://api.dicebear.com/7.x/identicon/svg?seed=${address}` : 'https://api.dicebear.com/7.x/identicon/svg?seed=default')}
                     alt="Avatar"
                     className="w-12 h-12 rounded-full bg-white/20 p-1"
                   />
@@ -114,7 +102,7 @@ export default function TopNav() {
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600 dark:text-gray-400">Wallet:</span>
                   <span className="text-sm font-medium text-gray-900 dark:text-white">
-                    {walletInfo.walletInfo?.name || 'Connected Wallet'}
+                    Camp Network
                   </span>
                 </div>
                 
@@ -127,30 +115,13 @@ export default function TopNav() {
                   </div>
                 )}
                 
-                {embeddedWalletInfo?.user?.email && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Email:</span>
-                    <span className="text-sm text-gray-900 dark:text-white truncate ml-2">
-                      {embeddedWalletInfo.user.email}
-                    </span>
-                  </div>
-                )}
-                
-                {embeddedWalletInfo?.authProvider && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Provider:</span>
-                    <span className="text-sm text-gray-900 dark:text-white">
-                      {embeddedWalletInfo.authProvider}
-                    </span>
-                  </div>
-                )}
                 
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600 dark:text-gray-400">Status:</span>
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                     <span className="text-sm text-green-600 dark:text-green-400 font-medium">
-                      {status || 'Connected'}
+                      {isConnected ? 'Connected' : 'Disconnected'}
                     </span>
                   </div>
                 </div>
@@ -163,15 +134,9 @@ export default function TopNav() {
                     <Settings className="w-4 h-4" />
                     Manage Profile
                   </Link>
-                  <button 
-                    onClick={handleDisconnect}
-                    className="w-full px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
-                    Disconnect Wallet
-                  </button>
+                  <div className="text-sm text-gray-500 dark:text-gray-400 text-center">
+                    Camp Network wallet is connected
+                  </div>
                 </div>
               </div>
               
