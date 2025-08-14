@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:residente.com)",
+      "Bash(curl:*)",
+      "Bash(grep:*)",
+      "Bash(npm install:*)",
+      "WebFetch(domain:www.cosmos.so)",
+      "Bash(rm:*)",
+      "Bash(npx tailwindcss init:*)",
+      "Bash(npm run dev:*)",
+      "Bash(ls:*)",
+      "WebFetch(domain:earn.superteam.fun)",
+      "Bash(mkdir:*)"
+    ],
+    "deny": []
+  }
+}
