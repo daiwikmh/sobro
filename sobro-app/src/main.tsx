@@ -34,7 +34,7 @@ if (rootElement) {
         <QueryClientProvider client={queryClient}>
           <CampProvider 
             clientId={import.meta.env.VITE_ORIGIN_CLIENT_ID || "your-client-id"}
-            redirectUri={window.location.origin}
+            redirectUri={"https://sobro-eight.vercel.app/"}
           >
               <TooltipProvider>
               <Toaster />
