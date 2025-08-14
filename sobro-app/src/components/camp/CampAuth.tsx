@@ -1,4 +1,4 @@
-import { useAuthState, useModal } from "@campnetwork/origin/react";
+import { CampModal, useAuthState, useModal } from "@campnetwork/origin/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ShieldCheckIcon } from "lucide-react";
@@ -30,7 +30,7 @@ export default function CampAuth() {
           </CardHeader>
           <CardContent>
             <Button className="w-full" onClick={handleConnectWallet}>
-              Connect Wallet
+              <CampModal/>
             </Button>
           </CardContent>
         </Card>

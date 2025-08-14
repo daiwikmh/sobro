@@ -9,7 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import Sidebar from "@/components/grants/sidebar";
 import MagicBento, { BentoCardProps } from "@/components/ui/MagicBento";
 import InteractiveBackgroundLayout from "@/components/layouts/InteractiveComponent";
-import {  useAuthState, useModal } from "@campnetwork/origin/react";
+import {  CampModal, useAuthState, useModal } from "@campnetwork/origin/react";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 
@@ -171,7 +171,7 @@ export default function TravelChatHome() {
                 onClick={handleConnectWallet}
                 className="bg-orange-500 hover:bg-orange-600 text-white font-medium px-6 py-2 rounded-lg"
               >
-                Connect Wallet
+              <CampModal/>
               </Button>
             ) : (
               <div className="flex items-center space-x-2 px-4 py-2 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
