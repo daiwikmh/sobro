@@ -1,11 +1,9 @@
 
 import { useState, useEffect } from "react"
 import { Camera, Mail, MapPin, Calendar, Globe, Edit2, Check, X } from "lucide-react"
-import { useAppKitAccount } from '@reown/appkit/react'
 import { useUserProfile } from '../../hooks/useUserProfile'
 
 export default function Profile() {
-  const { address, isConnected } = useAppKitAccount()
   const { profile, isLoading } = useUserProfile()
   const [isEditing, setIsEditing] = useState(false)
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle')
@@ -44,16 +42,7 @@ export default function Profile() {
     setLocalProfile(profile)
   }
 
-  if (!isConnected) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-[#0A0A0A] flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Please connect your wallet</h2>
-          <p className="text-gray-600 dark:text-gray-400">You need to connect your wallet to access your profile.</p>
-        </div>
-      </div>
-    )
-  }
+ 
 
   if (isLoading) {
     return (
@@ -321,7 +310,6 @@ export default function Profile() {
                       <span className="text-sm text-gray-600 dark:text-gray-400">Solana Address:</span>
                     </div>
                     <p className="text-sm font-mono text-gray-900 dark:text-white break-all">
-                      {address || 'Not connected'}
                     </p>
                   </div>
                 </div>
