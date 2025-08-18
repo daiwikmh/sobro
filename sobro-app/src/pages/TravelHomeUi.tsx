@@ -9,7 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import Sidebar from "@/components/grants/sidebar";
 import MagicBento, { BentoCardProps } from "@/components/ui/MagicBento";
 import InteractiveBackgroundLayout from "@/components/layouts/InteractiveComponent";
-import {  CampModal, useAuthState, useModal, useAuth } from "@campnetwork/origin/react";
+import {  CampModal, useAuthState, useAuth } from "@campnetwork/origin/react";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 
@@ -18,16 +18,11 @@ export default function TravelChatHome() {
   const [agentMode, setAgentMode] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const { authenticated } = useAuthState();
-  const { openModal } = useModal();
   const { disconnect } = useAuth();
 
-  const handleConnectWallet = async () => {
-    try {
-      await openModal();
-    } catch (error) {
-      console.error("Failed to connect wallet:", error);
-    }
-  };
+ 
+
+  
 
   const navigate = useNavigate();
 
@@ -168,6 +163,7 @@ export default function TravelChatHome() {
           {/* Top Bar with Connect Button */}
           <div className="flex w-full items-center justify-end p-4">
             {!authenticated ? (
+              
               <CampModal/>
             ) : (
               <div className="flex items-center space-x-2">

@@ -2,35 +2,35 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CalendarDays, Image as ImageIcon, ExternalLink, Upload } from "lucide-react";
+import {  Image as ImageIcon, ExternalLink, Upload } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuthState } from "@campnetwork/origin/react";
 import Sidebar from "../grants/sidebar";
 import { useCampfireIntegration } from "@/hooks/useCampfireIntegration";
 
-interface NFTMemory {
-  id: string;
-  token: {
-    id: string;
-    name?: string;
-  };
-  metadata?: {
-    name?: string;
-    description?: string;
-    image?: string;
-  };
-  name?: string;
-  description?: string;
-}
+// interface NFTMemory {
+//   id: string;
+//   token: {
+//     id: string;
+//     name?: string;
+//   };
+//   metadata?: {
+//     name?: string;
+//     description?: string;
+//     image?: string;
+//   };
+//   name?: string;
+//   description?: string;
+// }
 
 export default function Memories() {
   const navigate = useNavigate();
   const { authenticated } = useAuthState();
-  const { userNFTs, nftLoading, fetchUserNFTs, isConnected, getOriginData, getOriginUsage, address } = useCampfireIntegration();
+  const {  nftLoading, isConnected, getOriginData, getOriginUsage, address } = useCampfireIntegration();
   const [ipAssets, setIpAssets] = useState<any[]>([])
   const [filteredIPs, setFilteredIPs] = useState<any[]>([])
-  const [searchTerm, setSearchTerm] = useState('')
-  const [filterCategory, setFilterCategory] = useState('All')
+  const [searchTerm] = useState('')
+  const [filterCategory] = useState('All')
   const [stats, setStats] = useState({
     totalIPs: 0,
     totalRevenue: 0,
@@ -93,13 +93,7 @@ export default function Memories() {
     setFilteredIPs(filtered)
   }, [ipAssets, searchTerm, filterCategory])
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
+
 
   const handleUploadClick = () => {
     // Always redirect to upload page - it will handle authentication there

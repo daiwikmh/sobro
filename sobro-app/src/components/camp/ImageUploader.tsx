@@ -10,15 +10,15 @@ import { Upload, Image as ImageIcon, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
-interface UploadedMemory {
-  id: string;
-  file: File;
-  title: string;
-  description: string;
-  preview: string;
-  minted: boolean;
-  mintedAt?: Date;
-}
+// interface UploadedMemory {
+//   id: string;
+//   file: File;
+//   title: string;
+//   description: string;
+//   preview: string;
+//   minted: boolean;
+//   mintedAt?: Date;
+// }
 
 interface LicenseTerms {
   price: string;
