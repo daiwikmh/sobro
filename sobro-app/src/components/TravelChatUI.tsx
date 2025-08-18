@@ -109,7 +109,7 @@ const TravelChatUI = () => {
         setIsConnected(true);
         toast({
           title: "Connected",
-          description: "Successfully connected to travel assistant",
+          description: "Successfully connected using camp tokens",
         });
       };
 
