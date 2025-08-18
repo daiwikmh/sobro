@@ -3,9 +3,11 @@
     "allow": [
       "Bash(rm:*)",
       "Bash(echo $VITE_PINATA_JWT)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
-    "ask": []
+    "ask": [],
+    "defaultMode": "acceptEdits"
   }
 }

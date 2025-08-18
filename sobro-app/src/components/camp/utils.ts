@@ -32,6 +32,17 @@ export async function assignImage(imageId: string, jwt: string) {
   });
 }
 
+export async function getUserNFTs(walletAddress: string, jwt: string) {
+  const res = await fetch(`${import.meta.env.VITE_ORIGIN_API}/auth/nft/user-tokens?address=${walletAddress}`, {
+    headers: { 
+      Authorization: `Bearer ${jwt}`,
+      "Content-Type": "application/json",
+    },
+  });
+  const { data } = await res.json();
+  return data.tokens || [];
+}
+
 export interface UploadedMemory {
   id: string;
   title: string;

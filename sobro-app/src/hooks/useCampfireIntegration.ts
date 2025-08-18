@@ -11,6 +11,8 @@ export function useCampfireIntegration() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [userNFTs, setUserNFTs] = useState<any[]>([])
+  const [nftLoading, setNftLoading] = useState(false)
 
   // Clear messages after some time
   useEffect(() => {
@@ -43,6 +45,7 @@ export function useCampfireIntegration() {
       }
 
       const ipfsUrl = `https://gateway.pinata.cloud/ipfs/${result.IpfsHash}`;
+      console.log('IPFS Hash:', result.IpfsHash);
       setSuccess("File uploaded to IPFS successfully!");
       return ipfsUrl;
     } catch (error) {
@@ -107,11 +110,108 @@ export function useCampfireIntegration() {
         parentTokenId
       )
 
+      console.log('Token ID:', tokenId);
       setSuccess(`Successfully minted IP NFT with ID: ${tokenId}`)
       return tokenId
     } catch (err) {
       console.error('Minting error:', err)
       setError(err instanceof Error ? err.message : 'Failed to mint IP NFT')
+      return null
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const fetchUserNFTs = async () => {
+    if (!address) {
+      setError('Please connect your wallet first')
+      return
+    }
+
+    setNftLoading(true)
+    setError(null)
+
+    try {
+      const data = await getOriginData(address)
+      if (data) {
+        const filteredData = data.filter((ip: any) => ip.metadata?.image && ip.metadata.image !== '')
+        setUserNFTs(filteredData)
+      }
+    } catch (err) {
+      console.error('Error fetching NFTs:', err)
+      setError('Failed to fetch your NFTs')
+    } finally {
+      setNftLoading(false)
+    }
+  }
+
+  const getOriginData = async (userAdd: string) => {
+    if (!origin) {
+      setError('Origin SDK not available')
+      return null
+    }
+
+    setLoading(true)
+    setError(null)
+
+    try {
+      // Build the URL with the user's address
+      const userAddress = userAdd ? userAdd as Address : address as Address
+      console.log('Fetching data for address:', userAddress)
+      const url = `https://basecamp.cloud.blockscout.com/api/v2/addresses/${userAddress}/nft?type=ERC-721`
+      const response = await fetch(url)
+      if (!response.ok) throw new Error('Failed to fetch NFT data')
+      const body = await response.json()
+      return body.items
+    } catch (err) {
+      console.error('Get origin data error:', err)
+      setError(err instanceof Error ? err.message : 'Failed to get origin data')
+      return null
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const getOriginUsage = async () => {
+    if (!origin) {
+      setError('Origin SDK not available')
+      return null
+    }
+
+    setLoading(true)
+    setError(null)
+
+    try {
+      const data = await origin.getOriginUsage()
+      return data
+    } catch (err) {
+      console.error('Get origin usage error:', err)
+      setError(err instanceof Error ? err.message : 'Failed to get origin usage')
+      return null
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const getDataByTokenId = async (tokenId: string, userAdd?: string) => {
+    if (!origin) {
+      setError('Origin SDK not available')
+      return null
+    }
+
+    setLoading(true)
+    setError(null)
+
+    try {
+      const data = await getOriginData(userAdd?.toString() || '')
+      let res = []
+      if (data) {
+        res = data.filter((item: any) => item.id === tokenId)
+      }
+      return res[0]
+    } catch (err) {
+      console.error('Get NFT data error:', err)
+      setError(err instanceof Error ? err.message : 'Failed to get NFT data')
       return null
     } finally {
       setLoading(false)
@@ -125,9 +225,16 @@ export function useCampfireIntegration() {
     success,
     isConnected,
     address,
+    userNFTs,
+    nftLoading,
+    isPending: nftLoading,
 
     // Functions
     mintIPWithOrigin,
+    fetchUserNFTs,
+    getOriginData,
+    getOriginUsage,
+    getDataByTokenId,
 
     // Clear functions
     clearError: () => setError(null),

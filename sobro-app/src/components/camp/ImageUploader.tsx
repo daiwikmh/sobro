@@ -8,16 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Upload, Image as ImageIcon, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
-interface UploadedMemory {
-  id: string;
-  file: File;
-  title: string;
-  description: string;
-  preview: string;
-  minted: boolean;
-  mintedAt?: Date;
-}
 
 interface LicenseTerms {
   price: string;
@@ -34,6 +26,7 @@ interface IPMetadata {
 }
 
 export default function ImageUploader() {
+  const navigate = useNavigate();
   const { authenticated } = useAuthState();
   const { origin, jwt } = useAuth();
   const {
@@ -105,22 +98,6 @@ export default function ImageUploader() {
       )
 
       if (tokenId) {
-        
-        // Store in localStorage for memories display
-        const memories = JSON.parse(localStorage.getItem('sobro-memories') || '[]');
-        const newMemory: UploadedMemory = {
-          id: Date.now().toString(),
-          file: selectedFile,
-          title,
-          description,
-          preview,
-          minted: true,
-          mintedAt: new Date()
-        };
-        
-        memories.push(newMemory);
-        localStorage.setItem('sobro-memories', JSON.stringify(memories));
-
         toast.success("Memory minted successfully as IP-NFT!");
         
         // Reset form
@@ -131,6 +108,11 @@ export default function ImageUploader() {
         if (fileInputRef.current) {
           fileInputRef.current.value = "";
         }
+        
+        // Navigate to memories page after successful minting
+        setTimeout(() => {
+          navigate('/memories');
+        }, 1500); // Small delay to show the success toast
       }
     } catch (err) {
       console.error('Minting error:', err)
