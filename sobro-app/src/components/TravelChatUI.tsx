@@ -103,7 +103,7 @@ const TravelChatUI = () => {
 
   const connectWebSocket = () => {
     try {
-      wsRef.current = new WebSocket("wss://sobro-production.up.railway.app/ws/sobro");
+      wsRef.current = new WebSocket("wss://sobro-production-ee44.up.railway.app/ws/sobro");
 
       wsRef.current.onopen = () => {
         setIsConnected(true);

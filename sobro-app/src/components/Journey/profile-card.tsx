@@ -17,6 +17,9 @@ interface ProfileCardProps {
   contactText?: string;
   showUserInfo?: boolean;
   onContactClick?: () => void;
+  onMintClick?: () => void;
+  showMintButton?: boolean;
+  isMinting?: boolean;
 }
 
 const DEFAULT_BEHIND_GRADIENT =
@@ -67,6 +70,9 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
   contactText = "Contact",
   showUserInfo = true,
   onContactClick,
+  onMintClick,
+  showMintButton = true,
+  isMinting = false,
 }) => {
   const wrapRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -257,6 +263,10 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
     onContactClick?.();
   }, [onContactClick]);
 
+  const handleMintClick = useCallback(() => {
+    onMintClick?.();
+  }, [onMintClick]);
+
   return (
     <div
       ref={wrapRef}
@@ -298,15 +308,41 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
                     <div className="pc-status">{status}</div>
                   </div>
                 </div>
-                <button
-                  className="pc-contact-btn"
-                  onClick={handleContactClick}
-                  style={{ pointerEvents: "auto" }}
-                  type="button"
-                  aria-label={`Contact ${name || "user"}`}
-                >
-                  {contactText}
-                </button>
+                <div className="pc-button-group" style={{ display: "flex", gap: "8px" }}>
+                  <button
+                    className="pc-contact-btn"
+                    onClick={handleContactClick}
+                    style={{ pointerEvents: "auto", flex: 1 }}
+                    type="button"
+                    aria-label={`Contact ${name || "user"}`}
+                  >
+                    {contactText}
+                  </button>
+                  {showMintButton && (
+                    <button
+                      className="pc-mint-btn"
+                      onClick={handleMintClick}
+                      disabled={isMinting}
+                      style={{ 
+                        pointerEvents: "auto", 
+                        flex: 1,
+                        backgroundColor: isMinting ? "#666" : "#4CAF50",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "6px",
+                        padding: "8px 12px",
+                        fontSize: "12px",
+                        fontWeight: "600",
+                        cursor: isMinting ? "not-allowed" : "pointer",
+                        transition: "all 0.2s ease"
+                      }}
+                      type="button"
+                      aria-label={`Mint ${name || "profile"} card as NFT`}
+                    >
+                      {isMinting ? "Minting..." : "Mint NFT"}
+                    </button>
+                  )}
+                </div>
               </div>
             )}
           </div>

@@ -1,9 +1,13 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState, useRef } from "react"
 import Sidebar from "../grants/sidebar"
 import TopNav from "../grants/top-nav"
 import Hyperspeed from '@/components/ui/hyperspeed';
 import ProfileCard from './profile-card'
 import { useUserProfile } from "@/hooks/useUserProfile"
+import { useCampfireIntegration } from "@/hooks/useCampfireIntegration"
+import { useAuthState, useAuth } from "@campnetwork/origin/react"
+import html2canvas from "html2canvas"
+import { toast } from "sonner"
 
 
 function Layout({ children }: { children: React.ReactNode }) {
@@ -34,9 +38,18 @@ function Layout({ children }: { children: React.ReactNode }) {
 
 export default function Journey() {
   const { profile, getDisplayName } = useUserProfile()
+  const { authenticated } = useAuthState()
+  const { origin, jwt } = useAuth()
+  const { 
+    mintIPWithOrigin, 
+    clearError,
+    clearSuccess 
+  } = useCampfireIntegration()
   const [showHyperspeed, setShowHyperspeed] = useState(true)
   const [isVisible, setIsVisible] = useState(false)
   const [showProfileCard, setShowProfileCard] = useState(false)
+  const [isMinting, setIsMinting] = useState(false)
+  const profileCardRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     console.log('Journey component mounted')
@@ -57,13 +70,139 @@ export default function Journey() {
         setShowProfileCard(true)
         console.log('Hyperspeed animation removed, showing ProfileCard')
       }, 500) // Wait for fade out animation
-    }, 10100) // 10 seconds + initial delay
+    }, 1010) // 10 seconds + initial delay
 
     return () => {
       clearTimeout(timer)
       clearTimeout(hideTimer)
     }
   }, [])
+
+  const createPlaceholderImage = async (): Promise<File> => {
+    // Create a simple canvas as fallback
+    const canvas = document.createElement('canvas')
+    canvas.width = 400
+    canvas.height = 300
+    const ctx = canvas.getContext('2d')!
+    
+    // Create a gradient background
+    const gradient = ctx.createLinearGradient(0, 0, 400, 300)
+    gradient.addColorStop(0, '#6c5ce7')
+    gradient.addColorStop(1, '#00cec9')
+    ctx.fillStyle = gradient
+    ctx.fillRect(0, 0, 400, 300)
+    
+    // Add text
+    ctx.fillStyle = '#ffffff'
+    ctx.font = 'bold 24px Arial'
+    ctx.textAlign = 'center'
+    ctx.fillText(`${getDisplayName()}`, 200, 150)
+    ctx.font = '16px Arial'
+    ctx.fillText('Profile Card', 200, 180)
+    ctx.fillText(`@${profile?.username || "explorer"}`, 200, 200)
+    
+    // Convert to blob
+    const blob = await new Promise<Blob>((resolve) => {
+      canvas.toBlob((blob) => {
+        if (blob) resolve(blob)
+      }, 'image/png', 1.0)
+    })
+    
+    return new File([blob], `${getDisplayName()}-profile-card.png`, {
+      type: 'image/png'
+    })
+  }
+
+  const handleMintCard = async () => {
+    if (!authenticated || !origin || !jwt) {
+      toast.error("Please connect your wallet to mint")
+      return
+    }
+
+    setIsMinting(true)
+    
+    // Clear previous messages
+    clearError()
+    clearSuccess()
+    
+    try {
+      let selectedFile: File
+      
+      try {
+        // Try html2canvas first with very basic settings
+        if (profileCardRef.current) {
+          const canvas = await html2canvas(profileCardRef.current, {
+            backgroundColor: '#0f0f12',
+            scale: 1,
+            logging: false,
+            useCORS: true,
+            allowTaint: true,
+            width: 400,
+            height: 300,
+            windowWidth: 400,
+            windowHeight: 300
+          })
+
+          const blob = await new Promise<Blob>((resolve) => {
+            canvas.toBlob((blob) => {
+              if (blob) resolve(blob)
+            }, 'image/png', 1.0)
+          })
+
+          selectedFile = new File([blob], `${getDisplayName()}-profile-card.png`, {
+            type: 'image/png'
+          })
+        } else {
+          throw new Error('Element not found')
+        }
+      } catch (captureError) {
+        console.warn('html2canvas failed, using placeholder:', captureError)
+        // Fallback to placeholder image
+        selectedFile = await createPlaceholderImage()
+      }
+
+      // Use the same metadata structure as ImageUploader
+      const metadata = {
+        name: '',
+        description: '',
+      };
+      
+      const updatedMetadata = {
+        ...metadata,
+        name: `${getDisplayName()} - Profile Card`,
+        description: `Digital profile card for ${getDisplayName()} (${profile?.username || "explorer"}) - ${profile?.bio || "Traveler"}`,
+        mimeType: selectedFile.type,
+        size: selectedFile.size,
+      };
+
+      // Use the same license structure as ImageUploader
+      const license = {
+        price: '0',
+        duration: '2629800',
+        royalty: '0',
+        paymentToken: '0x0000000000000000000000000000000000000000',
+      };
+
+      // Mint the card using the same method as ImageUploader
+      const tokenId = await mintIPWithOrigin(
+        selectedFile,
+        updatedMetadata,
+        license,
+        ''
+      )
+      
+      if (tokenId) {
+        toast.success("Profile card minted successfully as IP-NFT!");
+      } else {
+        toast.error("Failed to mint profile card");
+      }
+    } catch (error) {
+      console.error('Minting error:', error)
+      toast.error("Failed to mint profile card. Please try again.");
+    } finally {
+      setIsMinting(false)
+    }
+  }
 
   return (
     <Layout>
@@ -122,7 +261,7 @@ export default function Journey() {
         {/* ProfileCard appears after hyperspeed animation */}
         {showProfileCard && (
           <div className="w-full h-full flex items-center justify-center bg-gray-50 dark:bg-[#0F0F12] animate-fade-in">
-            <div className="max-w-md">
+            <div className="max-w-md" ref={profileCardRef}>
               <ProfileCard
                 name={getDisplayName()}
                 title={profile?.bio || "Traveler"}
@@ -133,6 +272,9 @@ export default function Journey() {
                 showUserInfo={true}
                 enableTilt={true}
                 onContactClick={() => console.log('Contact clicked')}
+                onMintClick={handleMintCard}
+                showMintButton={true}
+                isMinting={isMinting}
               />
             </div>
           </div>
