@@ -59,11 +59,18 @@ export default function Memories() {
         
         const usage = await getOriginUsage()
         console.log('Usage data:', usage)
-        if (usage?.data?.user) {
+        if (usage?.user) {
           setStats(prev => ({
             ...prev,
-            totalRevenue: usage.data.user.points || 0,
-            totalLikes: usage.data.user.multiplier || 0,
+            totalRevenue: usage.user.points || 0,
+            totalLikes: usage.user.multiplier || 0,
+          }))
+        } else if ((usage as any)?.data?.user) {
+          // Fallback for different API structure
+          setStats(prev => ({
+            ...prev,
+            totalRevenue: (usage as any).data.user.points || 0,
+            totalLikes: (usage as any).data.user.multiplier || 0,
           }))
         }
       } catch (error) {
