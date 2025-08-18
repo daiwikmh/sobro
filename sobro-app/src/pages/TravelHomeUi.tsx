@@ -9,7 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import Sidebar from "@/components/grants/sidebar";
 import MagicBento, { BentoCardProps } from "@/components/ui/MagicBento";
 import InteractiveBackgroundLayout from "@/components/layouts/InteractiveComponent";
-import {  CampModal, useAuthState, useModal } from "@campnetwork/origin/react";
+import {  CampModal, useAuthState, useModal, useAuth } from "@campnetwork/origin/react";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 
@@ -19,6 +19,7 @@ export default function TravelChatHome() {
   const [inputValue, setInputValue] = useState("");
   const { authenticated } = useAuthState();
   const { openModal } = useModal();
+  const { disconnect } = useAuth();
 
   const handleConnectWallet = async () => {
     try {
@@ -167,18 +168,21 @@ export default function TravelChatHome() {
           {/* Top Bar with Connect Button */}
           <div className="flex w-full items-center justify-end p-4">
             {!authenticated ? (
-              <Button
-                onClick={handleConnectWallet}
-                className="bg-orange-500 hover:bg-orange-600 text-white font-medium px-6 py-2 rounded-lg"
-              >
               <CampModal/>
-              </Button>
             ) : (
-              <div className="flex items-center space-x-2 px-4 py-2 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-sm font-medium text-green-700 dark:text-green-300">
-                  Camp Network Connected
-                </span>
+              <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 px-4 py-2 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-sm font-medium text-green-700 dark:text-green-300">
+                    Camp Network Connected
+                  </span>
+                </div>
+                <button
+                  onClick={disconnect}
+                  className="px-3 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800 transition-colors"
+                >
+                  Disconnect
+                </button>
               </div>
             )}
           </div>

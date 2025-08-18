@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth, useAuthState } from '@campnetwork/origin/react'
 import { type Address } from 'viem'
+import { getUserNFTs } from '../components/camp/utils'
 
 export function useCampfireIntegration() {
   const auth = useAuth()

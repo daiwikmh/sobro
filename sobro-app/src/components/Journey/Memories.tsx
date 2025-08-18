@@ -2,21 +2,35 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {  Image as ImageIcon, ExternalLink, Upload } from "lucide-react";
+import { CalendarDays, Image as ImageIcon, ExternalLink, Upload } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuthState } from "@campnetwork/origin/react";
 import Sidebar from "../grants/sidebar";
 import { useCampfireIntegration } from "@/hooks/useCampfireIntegration";
 
+interface NFTMemory {
+  id: string;
+  token: {
+    id: string;
+    name?: string;
+  };
+  metadata?: {
+    name?: string;
+    description?: string;
+    image?: string;
+  };
+  name?: string;
+  description?: string;
+}
 
 export default function Memories() {
   const navigate = useNavigate();
   const { authenticated } = useAuthState();
-  const {  nftLoading,  isConnected, getOriginData, getOriginUsage } = useCampfireIntegration();
+  const { userNFTs, nftLoading, fetchUserNFTs, isConnected, getOriginData, getOriginUsage, address } = useCampfireIntegration();
   const [ipAssets, setIpAssets] = useState<any[]>([])
   const [filteredIPs, setFilteredIPs] = useState<any[]>([])
-  const [searchTerm] = useState('')
-  const [filterCategory] = useState('All')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [filterCategory, setFilterCategory] = useState('All')
   const [stats, setStats] = useState({
     totalIPs: 0,
     totalRevenue: 0,
@@ -26,12 +40,16 @@ export default function Memories() {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!authenticated || !isConnected) return;
+      if (!authenticated || !isConnected || !address) return;
       
       try {
-        let data = await getOriginData(authenticated ? authenticated.toString() : '')
+        console.log('Fetching data for wallet address:', address)
+        let data = await getOriginData(address)
+        console.log('Raw data received:', data)
+        
         if (data) {
           data = data.filter((ip: any) => ip.metadata?.image && ip.metadata.image !== '')
+          console.log('Filtered data:', data)
           setIpAssets(data)
           setStats(prev => ({
             ...prev,
@@ -40,11 +58,12 @@ export default function Memories() {
         }
         
         const usage = await getOriginUsage()
-        if (usage?.user) {
+        console.log('Usage data:', usage)
+        if (usage?.data?.user) {
           setStats(prev => ({
             ...prev,
-            totalRevenue: usage.user.points || 0,
-            totalLikes: usage.user.multiplier || 0,
+            totalRevenue: usage.data.user.points || 0,
+            totalLikes: usage.data.user.multiplier || 0,
           }))
         }
       } catch (error) {
@@ -53,7 +72,7 @@ export default function Memories() {
     }
 
     fetchData()
-  }, [authenticated, isConnected])
+  }, [authenticated, isConnected, address])
 
   useEffect(() => {
     // Filter IPs based on search and category
@@ -74,7 +93,13 @@ export default function Memories() {
     setFilteredIPs(filtered)
   }, [ipAssets, searchTerm, filterCategory])
 
-  
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
 
   const handleUploadClick = () => {
     // Always redirect to upload page - it will handle authentication there
